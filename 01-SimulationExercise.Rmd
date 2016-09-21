@@ -9,10 +9,12 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-##Overview
+## Overview
 In a few (2-3) sentences explain what is going to be reported on.
 
-## Simulations
+## Prepare Environment
+
+##Simulations
 Include English explanations of the simulations you ran, with the accompanying R code. Your explanations should make clear what the R code accomplishes.
 
 ## Sample Mean versus Theoretical Mean
