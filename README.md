@@ -12,9 +12,6 @@ I illustrate via simulation and associated explanatory text the properties of th
 * Demonstration that the distribution is approximately normal.
 
 ## 2. Inferential Data Analysis - Vitamin C Effect on Tooth Growth
-Analyzing the effect of Vitamin C on tooth development.
-
-
 Now in the second second, I analyze the effect of Vitamin C dosages and delivery methods on tooth development. 
 
     
