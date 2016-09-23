@@ -1,44 +1,91 @@
 ---
-title: "02-ToothGrowth-InferentialDataAnalysis"
-author: "Jason Battles"
-date: "September 21, 2016"
-output: html_document
+title: "Impact of Vitamin C on Tooth Development"
+author: "Jason R. Battles"
+date: "September 22, 2016"
+output: 
+  pdf_document: 
+    fig_height: 3.5
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+# 1. Synopsis
+This analysis will investigate the impact of Vitamin C on tooth development.  A study was performed in which 60 guinea pigs were given Vitamin C at various dosage levels (0.5, 1.0, and 2.0 mg/day) and by one of two delivery methods (Orange Juice and Ascorbic Acid).  The length of odontoblasts (cells responsible for tooth growth) were measured at the conclusion of the study.  
 
-## Synopsis
-
-## Prepare Environment
-Load the ToothGrowth data and perform some basic exploratory data analyses
-
-## Data Summary
-Provide a basic summary of the data.
-
-## Compare Tooth Growth by Treatment
-Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there's other approaches worth considering)
-
-## Conclusions
-State your conclusions and the assumptions needed for your conclusions.
-    
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+# 2. Prepare Environment & Data
+Load the necessary libraries, ToothGrowth data, and make necessary modifications to the data.
+```{r}
+library(ggplot2)
+library(datasets)
+library(gridExtra)
+data("ToothGrowth")
+ToothGrowth$dose <- factor(ToothGrowth$dose) # Convert dose to factor
 ```
 
-## Including Plots
+# 3. Data Summary & Exploratory Data Analysis
+The data is a set of 60 observations. Each of these observations include variables for length of odontoblasts (teeth), dosage levels, and vitamin delivery method (OJ = Orange Juice, VC = Ascorbic Acid).  *R code for graph creation is included in the Appendix*
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r, echo = FALSE}
+ggplot(ToothGrowth,aes(dose,len)) + 
+    geom_boxplot(aes(fill=supp)) + 
+    scale_fill_brewer(palette="YlOrRd") +
+    theme(legend.position=c(1,0.35),legend.justification=c(1,1)) + 
+    labs(title="Scatter Plot of Tooth Length vs. Dosage Levels",x="Dosage Levels (mg)",y="Tooth Length")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Performing some basic exploratory data analysis using a factored scatterplot yields some preliminary observations:
+
+1. Increased dosage levels appear to have a positive impact on tooth length.
+2. Orange Juice (OJ) appears to have more positive impact on tooth length than Ascorbic Acid (AA) at lower dosage levels.
+
+# 4. Compare Tooth Growth by Treatment
+Further analysis using confidence intervals and hypothesis testing provides greater statistical insight into these preliminary observations
+
+## 4.1 Tooth Growth by Dosage Level
+The different dosage levels must first be prepared in order to create statistical comparisons
+```{r}
+dose_05_10 <- subset(ToothGrowth, dose %in% c(0.5, 1.0))
+dose_05_20 <- subset(ToothGrowth, dose %in% c(0.5, 2.0))
+dose_10_20 <- subset(ToothGrowth, dose %in% c(1.0, 2.0))
+```
+
+T tests are conducted on each of the dosage combinations to determine if the Null Hypothesis may be rejected for any of these.  The Null Hypothesis is that there is **no correlation** between the Dosage Levels and Tooth Growth.
+```{r}
+t.test(len ~ dose, paired = F, var.equal = F, data = dose_05_10)
+t.test(len ~ dose, paired = F, var.equal = F, data = dose_05_20)
+t.test(len ~ dose, paired = F, var.equal = F, data = dose_10_20)
+```
+
+The confidence intervals for each of these dosage levels allow the Null Hypothesis to be rejected.
+
+* 0.5mg & 1.0mg Dosage Confidence Interval [-11.9838, -6.2762]  -> **Reject Null**
+* 0.5mg & 2.0mg Dosage Confidence Interval [-18.1562, -12.8338] -> **Reject Null**
+* 1.0mg & 2.0mg Dosage Confidence Interval [-8.9965, -3.7335]   -> **Reject Null**
+
+**Increased Vitamin C dosage levels appear to have a positive effect on Tooth Growth.**
+
+## 4.2 Tooth Growth by Delivery Method
+Analyzing the data for statistical correlation between Tooth Growth and Delivery Type, the Null Hypothesis is tested.  The Null Hypothesis is that there is **no correlation** between Delivery Method and Tooth Growth.
+```{r}
+t.test(len ~ supp, paired = F, var.equal = F, data = ToothGrowth)
+```
+The 95% Confidence Interval is [-0.1710156, 7.5710156], which includes zero.  **Do not Reject the null hypothesis**
+
+# Conclusions
+
+1. There is statistical evidence to support that increased dosages of vitamin C have a positive effect on Tooth Growth.
+2. There is not statistical evidence to support any finding that vitamin delivery method has any effect on Tooth Growth.
+
+\newpage
+
+# Appendix
+
+## R Code for Initial Exploratory Data Analysis Scatter Plot
+```{r, eval = FALSE}
+ggplot(ToothGrowth,aes(dose,len)) + 
+    geom_boxplot(aes(fill=supp)) + 
+    scale_fill_brewer(palette="YlOrRd") +
+    theme(legend.position=c(1,0.3),legend.justification=c(1,1)) + 
+    labs(title="Scatter Plot of Tooth Length vs. Dosage Levels",x="Dosage Levels (mg)",y="Tooth Length")
+```
